@@ -16,8 +16,8 @@ openvpn_epel_yumrepo_params: {}
 openvpn_config_file: server
 
 # Service name
-# (Change the value to "openvpn@{{ openvpn_config_file }}" if using systemd)
-openvpn_service: openvpn
+# (Change the value to "openvpn" if not using systemd)
+openvpn_service: openvpn@{{ openvpn_config_file }}
 
 # User and group
 openvpn_user: openvpn
