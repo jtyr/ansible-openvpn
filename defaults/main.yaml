@@ -29,9 +29,6 @@ openvpn_config_dir: /etc/openvpn
 # Directory for certificates
 openvpn_cert_dir: "{{ openvpn_config_dir }}/certs"
 
-# Directory for logs
-openvpn_log_dir: /var/log/openvpn
-
 # Log files to touch
 openvpn_log_files:
   - "{{ openvpn_config_logs_server }}"
@@ -183,8 +180,8 @@ openvpn_config_service: "{{
 
 
 # Values of the default logs part of the config file
-openvpn_config_logs_server: "{{ openvpn_log_dir }}/server.log"
-openvpn_config_logs_status: "{{ openvpn_log_dir }}/status.log"
+openvpn_config_logs_server: "/var/log/openvpn_server.log"
+openvpn_config_logs_status: "/var/log/openvpn_status.log"
 openvpn_config_logs_verb: 3
 openvpn_config_logs_mute: 20
 

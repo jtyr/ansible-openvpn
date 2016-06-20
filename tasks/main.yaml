@@ -34,16 +34,6 @@
   tags:
     - openvpn_user
 
-- name: Create the log directory
-  file:
-    path: "{{ openvpn_log_dir }}"
-    state: directory
-    owner: "{{ openvpn_user }}"
-    group: "{{ openvpn_group }}"
-    mode: 0750
-  tags:
-    - openvpn_logs
-
 - name: Check if the log files exist
   stat:
     path: "{{ item }}"
