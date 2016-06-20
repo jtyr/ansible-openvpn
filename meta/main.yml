@@ -1,0 +1,21 @@
+---
+
+galaxy_info:
+  author: Jiri Tyr
+  description: Role which helps to install and configure OpenVPN server.
+  license: MIT
+  min_ansible_version: 2.1
+  platforms:
+    - name: EL
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+    - name: GenericLinux
+      versions:
+        - all
+  categories:
+    - system
+dependencies:
+  - config_encoder_filters

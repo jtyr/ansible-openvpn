@@ -1,0 +1,9 @@
+---
+
+- name: Restart OpenVPN service
+  service:
+    name: "{{ openvpn_service }}"
+    state: restarted
+  when: >
+    openvpn_service_started is not defined or
+    not openvpn_service_started.changed

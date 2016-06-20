@@ -1,0 +1,116 @@
+---
+
+- name: Add EPEL YUM repo
+  yum_repository:
+    name: epel
+    description: EPEL YUM repo
+    baseurl: "{{ openvpn_epel_yumrepo_url }}"
+    gpgcheck: no
+    params: "{{ openvpn_epel_yumrepo_params }}"
+  when: >
+    ansible_os_family == "RedHat" and
+    openvpn_epel_install
+  tags:
+    - openvpn_pkg
+
+- name: Install OpenVPN package
+  package:
+    name: "{{ openvpn_pkg }}"
+  notify:
+    - Restart OpenVPN service
+  tags:
+    - openvpn_pkg
+
+- name: Create OpenVPN group
+  group:
+    name: "{{ openvpn_group }}"
+  tags:
+    - openvpn_user
+
+- name: Create OpenVPN user
+  user:
+    name: "{{ openvpn_user }}"
+    group: "{{ openvpn_group }}"
+  tags:
+    - openvpn_user
+
+- name: Create the log directory
+  file:
+    path: "{{ openvpn_log_dir }}"
+    state: directory
+    owner: "{{ openvpn_user }}"
+    group: "{{ openvpn_group }}"
+    mode: 0750
+  tags:
+    - openvpn_logs
+
+- name: Check if the log files exist
+  stat:
+    path: "{{ item }}"
+  register: openvpn_log_files_check
+  with_items: "{{ openvpn_log_files }}"
+  tags:
+    - openvpn_logs
+
+- name: Create log files
+  file:
+    path: "{{ item.item }}"
+    owner: "{{ openvpn_user }}"
+    group: "{{ openvpn_group }}"
+    mode: 0640
+    state: touch
+  when: not item.stat.exists
+  with_items: "{{ openvpn_log_files_check.results }}"
+  tags:
+    - openvpn_logs
+
+- name: Create the cert directory
+  file:
+    path: "{{ openvpn_cert_dir }}"
+    state: directory
+    owner: "{{ openvpn_user }}"
+    group: "{{ openvpn_group }}"
+    mode: 0750
+  tags:
+    - openvpn_certs
+
+- name: Install certificates
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ openvpn_user }}"
+    group: "{{ openvpn_group }}"
+    mode: 0640
+  when: item.src != ""
+  with_items: "{{ openvpn_certs }}"
+  notify:
+    - Restart OpenVPN service
+  tags:
+    - openvpn_certs
+
+- name: Create OpenVPN config file
+  template:
+    src: server.conf.j2
+    dest: "{{ openvpn_config_dir }}/{{ openvpn_config_file }}.conf"
+    owner: "{{ openvpn_user }}"
+    group: "{{ openvpn_group }}"
+    mode: 0640
+  notify:
+    - Restart OpenVPN service
+  tags:
+    - openvpn_config
+
+- name: Enable the OpenVPN service
+  service:
+    name: "{{ openvpn_service }}"
+    enabled: yes
+  tags:
+    - openvpn_service
+
+- name: Start the OpenVPN service
+  service:
+    name: "{{ openvpn_service }}"
+    state: started
+  register: openvpn_service_started
+  tags:
+    - openvpn_service
