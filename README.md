@@ -52,7 +52,7 @@ The server certificates are then used with the Ansible role as follows:
     openvpn_server_crt_source: /path/to/the/openvpn_pki/keys/vpn.server.com.crt
     openvpn_dh_source: /path/to/the/openvpn_pki/keys/dh2048.pem
     openvpn_ta_source: /path/to/the/openvpn_pki/keys/ta.key
-    # Change defaukt port number from 1194 to 5000
+    # Change default port number from 1194 to 5000
     openvpn_config_net_port: 5000
     # Suppress key persistency during the SIGUSR1 kill signal (set `null` value)
     openvpn_config_service_persist_key: null
@@ -88,7 +88,6 @@ persist-key #
 persist-tun #
 port 1194
 proto tcp
-push "redirect-gateway def1 bypass-dhcp"
 push "dhcp-option DNS 8.8.8.8"
 push "dhcp-option DNS 8.8.4.4"
 server 10.8.0.128 255.255.255.128
@@ -98,9 +97,15 @@ user openvpn
 verb 3
 ```
 
-The client side configuration file (`client01.ovpn`) can look like this:
+The client side requires only the `.p12` and the `ta.key` file. Android and iOS
+devices do not expose the CA certificate from the `.p12` file so it's necessary
+to add extra `ca` parameter into the client configuration file and import the
+`ca.crt` file to the device. The configuration file (`client01.ovpn`) can
+look like this:
 
 ```
+# Uncomment the following line for Android and iOS devices
+#ca ca.crt
 cipher AES-256-CBC
 client
 comp-lzo
@@ -227,13 +232,7 @@ openvpn_config_net_server_network: 10.8.0.128
 openvpn_config_net_server_mask: 255.255.255.128
 openvpn_config_net_server: "{{ openvpn_config_net_server_network }} {{ openvpn_config_net_server_mask }}"
 openvpn_config_net_ifconfig_pool_persist: ipp.txt
-openvpn_config_net_push_other__default:
-  - '"redirect-gateway def1 bypass-dhcp"'
-openvpn_config_net_push_other__custom: []
-openvpn_config_net_push_other: "{{
-  openvpn_config_net_push_other__default +
-  openvpn_config_net_push_other__custom
-}}"
+openvpn_config_net_push_other: []
 openvpn_config_net_push_dns:
   - '"dhcp-option DNS 8.8.8.8"'
   - '"dhcp-option DNS 8.8.4.4"'

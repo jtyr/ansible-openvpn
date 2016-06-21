@@ -102,13 +102,7 @@ openvpn_config_net_server_network: 10.8.0.128
 openvpn_config_net_server_mask: 255.255.255.128
 openvpn_config_net_server: "{{ openvpn_config_net_server_network }} {{ openvpn_config_net_server_mask }}"
 openvpn_config_net_ifconfig_pool_persist: ipp.txt
-openvpn_config_net_push_other__default:
-  - '"redirect-gateway def1 bypass-dhcp"'
-openvpn_config_net_push_other__custom: []
-openvpn_config_net_push_other: "{{
-  openvpn_config_net_push_other__default +
-  openvpn_config_net_push_other__custom
-}}"
+openvpn_config_net_push_other: []
 openvpn_config_net_push_dns:
   - '"dhcp-option DNS 8.8.8.8"'
   - '"dhcp-option DNS 8.8.4.4"'
