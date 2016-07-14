@@ -59,7 +59,7 @@ The server certificates are then used with the Ansible role as follows:
     # Add support for Certificate Revocation List
     # (use `make revoke_gen_crl` or `make revoke CLIENT="client01"` to create it)
     openvpn_certs__custom:
-      - src: /home/jtyr/Documents/ansible/rpi/tmp/openvpn_pki/keys/crl.pem
+      - src: /path/to/the/openvpn_pki/keys/crl.pem
         dest: "{{ openvpn_cert_dir }}/crl.pem"
     openvpn_config_certs__custom:
       crl-verify: "{{ openvpn_cert_dir }}/crl.pem"
