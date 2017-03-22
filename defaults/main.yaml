@@ -4,13 +4,16 @@
 openvpn_pkg: openvpn
 
 # Whether to install EPEL YUM repo
-openvpn_epel_install: no
+openvpn_epel_install: "{{ yumrepo_epel_install | default(true) }}"
 
 # EPEL YUM repo URL
 openvpn_epel_yumrepo_url: "{{ yumrepo_epel_url | default('https://dl.fedoraproject.org/pub/epel/$releasever/$basearch/') }}"
 
+# EPEL YUM repo GPG key
+openvpn_epel_yumrepo_gpgkey: "{{ yumrepo_epel_gpgkey | default('https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-$releasever') }}"
+
 # Additional YUM repo params
-openvpn_epel_yumrepo_params: {}
+openvpn_epel_yumrepo_params: "{{ yumrepo_epel_params | default({}) }}"
 
 # Name of the config file which will be used to enable/start the service
 openvpn_config_file: server
@@ -34,12 +37,16 @@ openvpn_log_files:
   - "{{ openvpn_config_logs_server }}"
   - "{{ openvpn_config_logs_status }}"
 
-# Paths to all the server keys and certificates (must be set as variable by the user!)
-openvpn_ca_crt_source: ""
-openvpn_server_key_source: ""
-openvpn_server_crt_source: ""
-openvpn_dh_source: ""
-openvpn_ta_source: ""
+# Disable logging for certs installation to protect the content of the keys
+openvpn_no_log: yes
+
+# Paths or content of all the server keys and certificates
+# (this must be set as variable by the user!)
+openvpn_ca_crt_source: null
+openvpn_server_key_source: null
+openvpn_server_crt_source: null
+openvpn_dh_source: null
+openvpn_ta_source: null
 
 # Path where all the server keys and certificates will be stored on the server
 openvpn_ca_crt_dest: "{{ openvpn_cert_dir }}/ca.crt"

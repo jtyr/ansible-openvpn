@@ -5,7 +5,7 @@
     name: epel
     description: EPEL YUM repo
     baseurl: "{{ openvpn_epel_yumrepo_url }}"
-    gpgcheck: no
+    gpgkey: "{{ openvpn_epel_yumrepo_gpgkey }}"
     params: "{{ openvpn_epel_yumrepo_params }}"
   when: >
     ansible_os_family == "RedHat" and
@@ -66,12 +66,15 @@
 
 - name: Install certificates
   copy:
-    src: "{{ item.src }}"
+    src: "{{ item.src if item.src[0:5] != '-----' else omit }}"
+    content: "{{ item.src if item.src[0:5] == '-----' else omit }}"
     dest: "{{ item.dest }}"
     owner: "{{ openvpn_user }}"
     group: "{{ openvpn_group }}"
     mode: 0640
-  when: item.src != ""
+  when: >
+    item.src != None
+  no_log: "{{ openvpn_no_log }}"
   with_items: "{{ openvpn_certs }}"
   notify:
     - Restart OpenVPN service

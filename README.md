@@ -40,6 +40,18 @@ The server certificates are then used with the Ansible role as follows:
     openvpn_dh_source: /path/to/the/openvpn_pki/keys/dh2048.pem
     openvpn_ta_source: /path/to/the/openvpn_pki/keys/ta.key
     openvpn_crl_source: /path/to/the/openvpn_pki/keys/crl.pem
+    # Cert content can be specified instead of the file path:
+    #openvpn_crl_source: |
+    #  -----BEGIN X509 CRL-----
+    #  AIIBYjBMMA0GCSqGSIb2DQEBCwUAMBOxGzAZBgNVBAMMEnZwbi50eXIuY29uc3Vs
+    #  dGluZxcNoTcwMjAyMMkwNjA4WhcNMTgwMjAyMDkwNjA4WjANBgkqhkiG9w/BAQsF
+    #  AA0CAQEASH2Ebpwjb4r1vAuFvbLUxK7Q4o2QHLj1U139PPZp1Kb2Ewn2XqpfcI6c
+    #  WORFq2fn7fu8o5VBTJZa6p/tGgzT03GWghw2fwBcy1n6bAT7lHKIKCwgx8BJCaTH
+    #  potfdi+6BzocEJG2BokLvZXbKloIm5iTunmvMEY4S5AX6e8KQ3MoNOLFIAI8nm6J
+    #  qCCyuk1mTP2l+CPrLOy4BWpD2zV42fvAKALYUhlgrwUQM2WNpsr5p7rbtc+gnvhm
+    #  vN1ZpX75Muf08ktbAXxow9HWXLDnbUOstWEU/95MffYwNfRLjnRtfZ5WTS6mcwaF
+    #  dGnCxtqVn6MlF6KWYVvfFX/rEIDC6g==
+    #  -----END X509 CRL-----
   roles:
     - openvpn
 
@@ -131,20 +143,23 @@ Variables used by the role is as follows:
 openvpn_pkg: openvpn
 
 # Whether to install EPEL YUM repo
-openvpn_epel_install: no
+openvpn_epel_install: "{{ yumrepo_epel_install | default(true) }}"
 
 # EPEL YUM repo URL
 openvpn_epel_yumrepo_url: "{{ yumrepo_epel_url | default('https://dl.fedoraproject.org/pub/epel/$releasever/$basearch/') }}"
 
+# EPEL YUM repo GPG key
+openvpn_epel_yumrepo_gpgkey: "{{ yumrepo_epel_gpgkey | default('https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-$releasever') }}"
+
 # Additional YUM repo params
-openvpn_epel_yumrepo_params: {}
+openvpn_epel_yumrepo_params: "{{ yumrepo_epel_params | default({}) }}"
 
 # Name of the config file which will be used to enable/start the service
 openvpn_config_file: server
 
 # Service name
-# (Change the value to "openvpn@{{ openvpn_config_file }}" if using systemd)
-openvpn_service: openvpn
+# (Change the value to "openvpn" if not using systemd)
+openvpn_service: openvpn@{{ openvpn_config_file }}
 
 # User and group
 openvpn_user: openvpn
@@ -156,20 +171,21 @@ openvpn_config_dir: /etc/openvpn
 # Directory for certificates
 openvpn_cert_dir: "{{ openvpn_config_dir }}/certs"
 
-# Directory for logs
-openvpn_log_dir: /var/log/openvpn
-
 # Log files to touch
 openvpn_log_files:
   - "{{ openvpn_config_logs_server }}"
   - "{{ openvpn_config_logs_status }}"
 
-# Paths to all the server keys and certificates (must be set as variable by the user!)
-openvpn_ca_crt_source: ""
-openvpn_server_key_source: ""
-openvpn_server_crt_source: ""
-openvpn_dh_source: ""
-openvpn_ta_source: ""
+# Disable logging for certs installation to protect the content of the keys
+openvpn_no_log: yes
+
+# Paths or content of all the server keys and certificates
+# (this must be set as variable by the user!)
+openvpn_ca_crt_source: null
+openvpn_server_key_source: null
+openvpn_server_crt_source: null
+openvpn_dh_source: null
+openvpn_ta_source: null
 
 # Path where all the server keys and certificates will be stored on the server
 openvpn_ca_crt_dest: "{{ openvpn_cert_dir }}/ca.crt"
@@ -304,8 +320,8 @@ openvpn_config_service: "{{
 
 
 # Values of the default logs part of the config file
-openvpn_config_logs_server: "{{ openvpn_log_dir }}/server.log"
-openvpn_config_logs_status: "{{ openvpn_log_dir }}/status.log"
+openvpn_config_logs_server: "/var/log/openvpn_server.log"
+openvpn_config_logs_status: "/var/log/openvpn_status.log"
 openvpn_config_logs_verb: 3
 openvpn_config_logs_mute: 20
 
