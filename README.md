@@ -73,6 +73,7 @@ The server certificates are then used with the Ansible role as follows:
     openvpn_certs__custom:
       - src: /path/to/the/openvpn_pki/keys/crl.pem
         dest: "{{ openvpn_cert_dir }}/crl.pem"
+        type: crl
     openvpn_config_certs__custom:
       crl-verify: "{{ openvpn_cert_dir }}/crl.pem"
   roles:

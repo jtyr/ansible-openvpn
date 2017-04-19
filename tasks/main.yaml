@@ -42,6 +42,18 @@
   tags:
     - openvpn_logs
 
+- name: Create the log directory
+  file:
+    path: "{{ item.item | dirname }}"
+    state: directory
+    owner: "{{ openvpn_user }}"
+    group: "{{ openvpn_group }}"
+    mode: 0750
+  when: not item.stat.exists
+  with_items: "{{ openvpn_log_files_check.results }}"
+  tags:
+    - openvpn_certs
+
 - name: Create log files
   file:
     path: "{{ item.item }}"
@@ -64,7 +76,7 @@
   tags:
     - openvpn_certs
 
-- name: Install certificates
+- name: Install certificates with restart
   copy:
     src: "{{ item.src if item.src[0:5] != '-----' else omit }}"
     content: "{{ item.src if item.src[0:5] == '-----' else omit }}"
@@ -73,11 +85,33 @@
     group: "{{ openvpn_group }}"
     mode: 0640
   when: >
-    item.src != None
+    item.src != None and (
+      item.type is not defined or (
+        item.type is defined and
+        item.type != 'crl'
+      )
+    )
   no_log: "{{ openvpn_no_log }}"
   with_items: "{{ openvpn_certs }}"
   notify:
     - Restart OpenVPN service
+  tags:
+    - openvpn_certs
+
+- name: Install certificates without restart
+  copy:
+    src: "{{ item.src if item.src[0:5] != '-----' else omit }}"
+    content: "{{ item.src if item.src[0:5] == '-----' else omit }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ openvpn_user }}"
+    group: "{{ openvpn_group }}"
+    mode: 0640
+  when: >
+    item.src != None and
+    item.type is defined and
+    item.type == 'crl'
+  no_log: "{{ openvpn_no_log }}"
+  with_items: "{{ openvpn_certs }}"
   tags:
     - openvpn_certs
 
