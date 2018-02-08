@@ -52,7 +52,7 @@
   when: not item.stat.exists
   with_items: "{{ openvpn_log_files_check.results }}"
   tags:
-    - openvpn_certs
+    - openvpn_logs
 
 - name: Create log files
   file:
